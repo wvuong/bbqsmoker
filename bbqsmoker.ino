@@ -51,23 +51,47 @@ void loop() {
 }
 
 // function copied from http://hruska.us/tempmon/BBQ_Controller.pde for maverick bbq probes
+// http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1246091012
+// http://www.kpsec.freeuk.com/vdivider.htm
+
+/*
+  // pit et732 probe
+  double A = 5.36924e-4;
+  double B = 1.91396e-4;
+  double C = 6.60399e-8;
+*/
+
 int thermister_temp(int aval) {
-	double R, T;
-
-	// These were calculated from the thermister data sheet
-	//	A = 2.3067434E-4;
-	//	B = 2.3696596E-4;
-	//	C = 1.2636414E-7;
-	//
-	// This is the value of the other half of the voltage divider
-	//	Rknown = 22200;
-
-	// Do the log once so as not to do it 4 times in the equation
-	//	R = log(((1024/(double)aval)-1)*(double)22200);
-	R = log((1 / ((1024 / (double) aval) - 1)) * (double) 22200);
-	//lcd.print("A="); lcd.print(aval); lcd.print(" R="); lcd.print(R);
-	// Compute degrees C
-	T = (1 / ((2.3067434E-4) + (2.3696596E-4) * R + (1.2636414E-7) * R * R * R)) - 273.25;
-	// return degrees F
-	return ((int) ((T * 9.0) / 5.0 + 32.0));
+  double A = 2.3067434E-4; //  ET-73, ET-7
+  double B = 2.3696596E-4;
+  double C = 1.2636414E-7;
+  return thermister_temp(aval, A, B, C);
 }
+/*
+925.00 voltage=4.52 R=207,424.20
+sensor = 925	 output = 75
+
+1023.00 voltage=5.00 R=22,710,622.00
+sensor = 1023	 output = -89
+*/
+int thermister_temp(float aval, double A, double B, double C) {
+  double logR, R, T;
+
+  // This is the value of the other half of the voltage divider
+  //	Rknown = 22200;
+  
+  float voltage = aval/1024*5.0;
+  
+  // Do the log once so as not to do it 4 times in the equation
+  //	R = log(((1024/(double)aval)-1)*(double)22200);
+  R = (1 / ((1024 / (double) aval) - 1)) * (double) 22200; // this calculation is for vcc -> 22k resistor -> analog in -> thermister -> ground
+  logR = log(R);
+  Serial.print(aval); Serial.print(" voltage="); Serial.print(voltage); Serial.print(" R="); Serial.print(R); Serial.print("\n");
+  
+  // Compute degrees C from Kelvin; T = 1 / (A + B log(R) + C log(R) ^ 3)
+  T = (1 / (A + B * logR + C * logR * logR * logR)) - 273.25;
+  
+  // return degrees F
+  return ((int) ((T * 9.0) / 5.0 + 32.0));
+}
+
