@@ -9,6 +9,15 @@
 #include <LiquidCrystal.h>
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 int backLight = 13;    // pin 13 will control the backlight
+byte degree[8] = { // http://www.quinapalus.com/hd44780udg.html
+  B01100,
+  B10010,
+  B10010,
+  B01100,
+  B00000,
+  B00000,
+  B00000,
+};
 
 // These constants won't change.  They're used to give names
 // to the pins used:
@@ -23,6 +32,7 @@ void setup() {
   pinMode(backLight, OUTPUT);
   digitalWrite(backLight, HIGH); // turn backlight on. Replace 'HIGH' with 'LOW' to turn it off.
   lcd.begin(16,2);
+  lcd.createChar(0, degree); // add in the degree symbol
   
   // initialize serial communications at 9600 bps:
   Serial.begin(9600); 
@@ -45,14 +55,14 @@ void loop() {
     stringValue = "No signal";
   }
   else {
-    stringValue = outputValue + "°";
+    stringValue = String(outputValue);
   }
 
   lcd.clear();                  // start with a blank screen
   lcd.setCursor(0,0);           // set cursor to column 0, row 0 (the first row)
-  lcd.print("Current temp:");    // change this text to whatever you like. keep it clean.
+  lcd.print("Current:"); // change this text to whatever you like. keep it clean.
   lcd.setCursor(0,1);           // set cursor to column 0, row 1
-  lcd.print(stringValue);
+  lcd.print(stringValue); lcd.write((uint8_t)0); // write degree symbol http://arduino.cc/forum/index.php?topic=94914.0
   lcd.noAutoscroll();
 
   // wait 2 milliseconds before the next loop
