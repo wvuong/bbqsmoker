@@ -1,32 +1,29 @@
 /*
-  Analog input, analog output, serial output
+ Based on the "Analog input, analog output, serial output" example sketch.
  
- Reads an analog input pin, maps the result to a range from 0 to 255
- and uses the result to set the pulsewidth modulation (PWM) of an output pin.
- Also prints the results to the serial monitor.
- 
- The circuit:
- * potentiometer connected to analog pin 0.
-   Center pin of the potentiometer goes to the analog pin.
-   side pins of the potentiometer go to +5V and ground
- * LED connected from digital pin 9 to ground
- 
- created 29 Dec. 2008
- modified 9 Apr 2012
- by Tom Igoe
- 
- This example code is in the public domain.
- 
+ This program reads from Maverick probes via analog A0 pin and writes the observed temperature
+ value to the LCD.
  */
+
+// include the library code:
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+int backLight = 13;    // pin 13 will control the backlight
 
 // These constants won't change.  They're used to give names
 // to the pins used:
-const int analogInPin = A0;  // Analog input pin that the potentiometer is attached to
+const int analogInPin = A0;  // Analog input pin that the probe is attached to
 
 int sensorValue = 0;        // value read from the pot
 int outputValue = 0;        // value output to the PWM (analog out)
+String stringValue = "";
 
 void setup() {
+  // set up backlight
+  pinMode(backLight, OUTPUT);
+  digitalWrite(backLight, HIGH); // turn backlight on. Replace 'HIGH' with 'LOW' to turn it off.
+  lcd.begin(16,2);
+  
   // initialize serial communications at 9600 bps:
   Serial.begin(9600); 
 }
@@ -43,6 +40,20 @@ void loop() {
   Serial.print(sensorValue);      
   Serial.print("\t output = ");      
   Serial.println(outputValue);   
+
+  if (sensorValue == 0 || sensorValue == 1023) {
+    stringValue = "No signal";
+  }
+  else {
+    stringValue = outputValue + "°";
+  }
+
+  lcd.clear();                  // start with a blank screen
+  lcd.setCursor(0,0);           // set cursor to column 0, row 0 (the first row)
+  lcd.print("Current temp:");    // change this text to whatever you like. keep it clean.
+  lcd.setCursor(0,1);           // set cursor to column 0, row 1
+  lcd.print(stringValue);
+  lcd.noAutoscroll();
 
   // wait 2 milliseconds before the next loop
   // for the analog-to-digital converter to settle
@@ -67,6 +78,7 @@ int thermister_temp(int aval) {
   double C = 1.2636414E-7;
   return thermister_temp(aval, A, B, C);
 }
+
 /*
 925.00 voltage=4.52 R=207,424.20
 sensor = 925	 output = 75
@@ -94,4 +106,3 @@ int thermister_temp(float aval, double A, double B, double C) {
   // return degrees F
   return ((int) ((T * 9.0) / 5.0 + 32.0));
 }
-
