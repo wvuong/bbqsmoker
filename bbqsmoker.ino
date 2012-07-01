@@ -39,12 +39,16 @@ void setup() {
 }
 
 void loop() {
+  String probes[] = {"ET-7x", "ET-732", "Polder"};
+  double Avalues[] = {};
+  
+  
   // read the analog in value:
-  sensorValue = analogRead(analogInPin);            
+  sensorValue = readAndOverSample(analogInPin);
+  
   // map it to the range of the analog out:
   outputValue = thermister_temp(sensorValue);
-  // change the analog out value:      
-
+  
   // print the results to the serial monitor:
   Serial.print("sensor = " );                       
   Serial.print(sensorValue);      
@@ -69,6 +73,30 @@ void loop() {
   // for the analog-to-digital converter to settle
   // after the last reading:
   delay(2000);                     
+}
+
+// http://en.wikipedia.org/wiki/Oversampling
+// https://github.com/CapnBry/HeaterMeter/blob/c05dc0c39672f12aaf25314c2dfe46a51fb3535d/arduino/heatermeter/grillpid.cpp
+int readAndOverSample(int apin) {
+  int sensorvalue = 0;
+  unsigned int accumulated = 0;
+  int numsamples = 64; // to get 3 more bits of precision from 10 to 13, 2^(2*3) = 64 samples
+  int n = 0;
+  
+  // take 64 samples
+  for (int i = 0; i < numsamples; i++) {
+    sensorvalue = analogRead(apin);
+    // Serial.print(sensorvalue); Serial.print(" ");
+    if (sensorValue == 0 || sensorValue >= 1023) {
+      return -1;
+    }
+    accumulated += sensorvalue;
+    n++;
+  }
+  
+  unsigned int oversampled = ((float)(accumulated >> 3)/((1 << 13) - 1)) * 1024;
+  Serial.print("accumulated="); Serial.print(accumulated); Serial.print(", "); Serial.print(n); Serial.print("x, oversampled="); Serial.println(oversampled);
+  return oversampled;
 }
 
 // function copied from http://hruska.us/tempmon/BBQ_Controller.pde for maverick bbq probes
@@ -96,7 +124,7 @@ sensor = 925	 output = 75
 1023.00 voltage=5.00 R=22,710,622.00
 sensor = 1023	 output = -89
 */
-int thermister_temp(float aval, double A, double B, double C) {
+int thermister_temp(int aval, double A, double B, double C) {
   double logR, R, T;
 
   // This is the value of the other half of the voltage divider
