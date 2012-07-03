@@ -1,17 +1,25 @@
 ANOTHER ARDUINO BBQ SMOKER
 ==========================
 
-This is going to be a temperature monitor inspired by this Homebrew Temperature Monitor/Controller project (http://hruska.us/tempmon/ and http://hruska.us/tempmon/BBQ_Controller.pde).  The first milestone is to build a temperature monitor thing that reads temperature from Maverick probes and displays them on an LCD with stats and stuff.  The second milestone is to adjust the temperature somehow (?).
+This is going to be a temperature monitor inspired by this Homebrew Temperature Monitor/Controller project (http://hruska.us/tempmon/ and http://hruska.us/tempmon/BBQ_Controller.pde) and also the Heater Meter (https://github.com/CapnBry/HeaterMeter).  The first milestone is to build a temperature monitor thing that reads temperature from Maverick probes and displays them on an LCD with stats and stuff.  The second milestone is to adjust the temperature somehow (?).
 
-I'm just a Java programmer with no electronics hardware experience.  There is a Fritzing schematic that shows the current state of the build.
+I'm just a Java programmer with no electronics hardware experience.  Plus, I haven't written anything with pointers in years.  So the code may be terrible, inefficient.
+
+There is a Fritzing schematic that shows the current state of the build.
 
 Parts List
 ==========================
-* Arduino Uno
-* 1x Switchcraft TR2A Rev E 2.5mm jack
-* 1x 22k resistor
-* 1x Maverick probe
+* Arduino Uno 5V
+* 3x Switchcraft TR2A Rev E 2.5mm jack
+* 2x 22k resistor
+* 1x 10k resistor
+* 3x Probes: Maverick ET-7 (food), Maverick ET-732 (pit), Polder (food)
+* 16x2 Basic LCD (from SparkFun)
 
 Notes:
 ==========================
-* The Fritizing schematic shows a 3.5mm jack instead of a 2.5mm jack.  The 2.5mm jack (Switchcraft TR2A Rev E) has three connectors: #1 tip terminal, #2 shunt terminal, #3 sleeve terminal.  The #1 tip and #2 shunt terminals go to ground.
+* The Fritizing schematic shows a 3.5mm jack instead of a 2.5mm jack.  The 2.5mm jack (Switchcraft TR2A Rev E) has three connectors: #1 tip terminal, #2 shunt terminal, #3 sleeve terminal.  The #1 tip goes to the VCC/voltage divider and #3 sleeve terminal goes to ground.  I found that there is no need to wire the shunt terminal.
+
+* The R calculation can be different depending on how you wire the voltage divider for probe reading.  Mine is wired: VCC -> fixed resistor -> A0 -> tip terminal of 2.5mm jack.
+
+* Using a Kill-a-Watt, when connected to a 12V/3A power supply, it draws in 0.02A.
