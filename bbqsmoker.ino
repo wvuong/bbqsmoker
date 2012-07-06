@@ -115,6 +115,11 @@ void loop() {
     */    
   }
   
+  // blink the backlight to show that we have a new reading
+  lcd.noDisplay();
+  delay(200);
+  lcd.display();
+  
   // print all probe summary
   lcd.clear();
   lcd.noAutoscroll();
